@@ -169,7 +169,7 @@ struct AskLaptopIntent: AppIntent {
     var request: String
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-        let a = try await Link.ask(request)
+        let a = try await RelayLink.ask(request)
         return .result(value: a, dialog: IntentDialog(stringLiteral: a))
     }
 }
