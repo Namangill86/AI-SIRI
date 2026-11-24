@@ -1,0 +1,12 @@
+{
+  "name": "siriai-link",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SiriAI relay + laptop agent (zero dependencies)",
+  "scripts": {
+    "start": "node relay/server.js",
+    "agent": "node agent/agent.js",
+    "test": "node tests/e2e.js"
+  },
+  "engines": { "node": ">=18" }
+}

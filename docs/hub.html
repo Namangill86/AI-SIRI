@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SiriAI Hub">
+<meta name="theme-color" content="#0b0820">
+<title>SiriAI Hub</title>
+<style>
+:root{--glass:rgba(255,255,255,.08);--line:rgba(255,255,255,.15)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:#0b0820;color:#fff;font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+.aurora{position:fixed;inset:0;overflow:hidden;z-index:0}
+.aurora i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:drift 18s ease-in-out infinite alternate}
+.aurora i:nth-child(1){width:46vmax;height:46vmax;background:#4f46e5;left:-10vmax;top:-10vmax}
+.aurora i:nth-child(2){width:40vmax;height:40vmax;background:#a21caf;right:-12vmax;bottom:-8vmax;animation-duration:22s}
+.aurora i:nth-child(3){width:30vmax;height:30vmax;background:#06b6d4;left:30%;top:35%;animation-duration:26s}
+@keyframes drift{to{transform:translate(8vmax,6vmax) scale(1.2)}}
+.app{position:relative;z-index:1;height:100dvh;max-width:820px;margin:0 auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;gap:10px}
+.glass{border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.icon{width:42px;height:42px;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;transition:transform .2s;flex:none}
+.icon:active{transform:scale(.9)}
+.pill{padding:8px 14px;border-radius:999px;font-size:14px;transition:all .3s}
+.pill.on{box-shadow:0 0 18px rgba(34,197,94,.45)}
+#chat{flex:1;overflow-y:auto;padding:8px 14px 12px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.empty{margin:auto;text-align:center;opacity:.75;max-width:420px;line-height:1.6}
+.empty h2{margin:0 0 6px}
+.msg{max-width:84%;padding:10px 14px;border-radius:20px;white-space:pre-wrap;word-wrap:break-word;animation:pop .4s cubic-bezier(.2,1.2,.4,1) both}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#4f46e5,#9333ea)}
+.msg.ai{align-self:flex-start}
+.msg.sys{align-self:center;font-size:13px;opacity:.75;padding:6px 12px;border-radius:999px}
+.card{align-self:flex-start;max-width:84%;padding:12px;border-radius:18px;animation:pop .4s cubic-bezier(.2,1.2,.4,1) both;display:flex;flex-direction:column;gap:8px}
+.card.out{align-self:flex-end}
+.card img{max-width:100%;max-height:260px;border-radius:12px;display:block}
+.card .row{display:flex;align-items:center;gap:10px}
+.card .big{font-size:26px}
+.card small{opacity:.65}
+.card a.btn{padding:6px 14px;border-radius:999px;background:#fff;color:#4338ca;font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap}
+.bar{height:5px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#a855f7);transition:width .2s}
+.notify{border-left:4px solid #f59e0b}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.92)}}
+.dots{align-self:flex-start;display:flex;gap:6px;padding:14px;border-radius:18px}
+.dots b{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.8;animation:dot 1s infinite}
+.dots b:nth-child(2){animation-delay:.15s}.dots b:nth-child(3){animation-delay:.3s}
+@keyframes dot{50%{transform:scale(.5);opacity:.4}}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 14px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;padding:8px 14px;border-radius:999px;color:#fff;font:inherit;font-size:14px;cursor:pointer;transition:transform .2s}
+.chips button:active{transform:scale(.94)}
+form{display:flex;gap:10px;padding:4px 14px 12px;align-items:flex-end}
+textarea{flex:1;resize:none;max-height:120px;padding:12px 16px;border-radius:24px;color:#fff;font:inherit;outline:none}
+textarea::placeholder{color:rgba(255,255,255,.5)}
+.send{background:linear-gradient(135deg,#4f46e5,#9333ea)!important;border:0!important;transition:opacity .2s,transform .25s}
+.send:disabled{opacity:.35;transform:scale(.8)}
+.drop{position:fixed;inset:0;z-index:5;display:none;place-items:center;background:rgba(40,20,120,.6);font-size:24px;backdrop-filter:blur(6px)}
+.drop.show{display:grid}
+dialog{border:1px solid var(--line);border-radius:20px;background:#15103a;color:#fff;padding:20px;width:min(92vw,440px)}
+dialog::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+dialog label{display:block;margin:12px 0 4px;font-size:13px;opacity:.7}
+dialog input{width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font:inherit}
+dialog .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+dialog button{padding:9px 16px;border-radius:999px;border:0;font:inherit;font-weight:600;cursor:pointer;background:#3b2a5a;color:#fff}
+dialog button.p{background:#fff;color:#4338ca}
+dialog small{display:block;margin-top:10px;opacity:.6;font-size:12px}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="drop" id="drop">Drop files to send</div>
+<div class="app">
+  <header>
+    <span class="pill glass" id="pill">Not connected</span>
+    <button class="icon glass" id="setBtn" title="Settings">⚙️</button>
+  </header>
+  <div id="chat"></div>
+  <div class="chips" id="chips"></div>
+  <form id="form">
+    <button type="button" class="icon glass" id="attach" title="Send a file or photo">📎</button>
+    <textarea id="input" class="glass" rows="1" placeholder="Ask your laptop's AI…"></textarea>
+    <button class="icon send" id="sendBtn" disabled>↑</button>
+  </form>
+  <input type="file" id="file" multiple hidden>
+</div>
+
+<dialog id="dlg">
+  <h3 style="margin:0">Connect devices</h3>
+  <label>Relay URL</label><input id="relayIn" placeholder="https://your-relay.onrender.com" autocapitalize="off" autocorrect="off">
+  <label>Room token (same on every device)</label><input id="tokenIn" type="password" autocapitalize="off" autocorrect="off">
+  <label>Laptop name</label><input id="laptopIn" placeholder="laptop" autocapitalize="off">
+  <small id="testOut">The token is stored only in this browser. Use a long random one.</small>
+  <div class="row">
+    <button id="genBtn">Generate token</button>
+    <button id="testBtn">Test</button>
+    <button id="notifBtn">Enable alerts</button>
+    <button id="clearBtn">Clear history</button>
+    <button id="saveBtn" class="p">Save &amp; connect</button>
+  </div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const st={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const cfg=()=>({relay:String(st.get('relay','')).replace(/\/+$/,''),token:st.get('token',''),laptop:st.get('laptop','laptop')||'laptop'});
+const ME=/iPhone|iPad/.test(navigator.userAgent)?'iphone':/Android/.test(navigator.userAgent)?'android':'browser';
+const uid=()=>(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now().toString(36));
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fmtSize=n=>n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
+let items=st.get('items',[]),seen=new Set(st.get('seen',[])),since=st.get('since',0),es=null,timers=new Map(),typingEl=null;
+const chat=$('#chat'),input=$('#input'),sendBtn=$('#sendBtn');
+
+/* ---------- timeline ---------- */
+function fileURL(id,inline){const c=cfg();return `${c.relay}/file/${id}?t=${encodeURIComponent(c.token)}${inline?'&inline=1':''}`}
+function build(it){
+ const d=document.createElement('div');
+ if(it.k==='user'||it.k==='ai'||it.k==='sys'){d.className='msg '+it.k+(it.k!=='user'?' glass':'');d.textContent=it.text;return d}
+ if(it.k==='notify'){d.className='card glass notify';d.innerHTML=`<div class="row"><span class="big">🔔</span><div><b>${esc(it.title||'Notification')}</b><br>${esc(it.body||'')}<br><small>${esc(it.app||it.from||'')}</small></div></div>`;return d}
+ if(it.k==='file'){
+  d.className='card glass'+(it.dir==='out'?' out':'');d.dataset.id=it.id||'';
+  const isImg=/^image\/(png|jpe?g|gif|webp)$/.test(it.mime||'');
+  let h='';
+  if(it.dir==='in'&&isImg)h+=`<img loading="lazy" src="${fileURL(it.id,true)}" alt="">`;
+  h+=`<div class="row"><span class="big">${isImg?'🖼️':'📄'}</span><div style="flex:1;min-width:0"><b style="word-break:break-all">${esc(it.name)}</b><br><small>${fmtSize(it.size||0)} · ${it.dir==='in'?'from '+esc(it.from):'sent'}</small></div>`;
+  if(it.dir==='in')h+=`<a class="btn" href="${fileURL(it.id)}" download="${esc(it.name)}">Save</a>`;
+  h+=`</div>`;if(it.dir==='out'&&it.progress!==undefined)h+=`<div class="bar"><i style="width:${it.progress}%"></i></div>`;
+  d.innerHTML=h;return d}
+ return d;
+}
+function empty(){if(!items.length&&!chat.querySelector('.empty')&&!typingEl){chat.innerHTML=`<div class="empty"><h2>Your devices, linked</h2>Chat with the AI on your laptop, send files and photos both ways, and see notifications you forward here.<br><br>Tap ⚙️ to connect.</div>`}}
+function add(it,animate=true){
+ const e=chat.querySelector('.empty');if(e)e.remove();
+ items.push(it);const el=build(it);if(!animate)el.style.animation='none';chat.appendChild(el);chat.scrollTop=chat.scrollHeight;persist();return el}
+function persist(){st.set('items',items.slice(-150).map(i=>({...i,progress:undefined})));st.set('seen',[...seen].slice(-300));st.set('since',since)}
+function typing(on){if(on&&!typingEl){typingEl=document.createElement('div');typingEl.className='dots glass';typingEl.innerHTML='<b></b><b></b><b></b>';chat.appendChild(typingEl);chat.scrollTop=chat.scrollHeight}else if(!on&&typingEl){typingEl.remove();typingEl=null}}
+function restore(){chat.innerHTML='';items.forEach(i=>chat.appendChild(Object.assign(build(i),{})));chat.querySelectorAll('.msg,.card').forEach(e=>e.style.animation='none');chat.scrollTop=chat.scrollHeight;empty()}
+
+/* ---------- relay ---------- */
+async function post(path,body){const c=cfg();const r=await fetch(c.relay+path,{method:'POST',headers:{'content-type':'application/json','x-room-token':c.token},body:JSON.stringify({from:ME,...body})});if(!r.ok)throw new Error('relay '+r.status);return r}
+function setPill(devs){const c=cfg();const on=devs&&devs.includes(c.laptop);const p=$('#pill');p.textContent=devs==null?'Connecting…':on?'● '+c.laptop+' online':'○ '+c.laptop+' offline';p.classList.toggle('on',!!on)}
+function connect(){
+ if(es){es.close();es=null}
+ const c=cfg();if(!c.relay||c.token.length<16){setPill(null);$('#pill').textContent='Not connected';return}
+ setPill(null);
+ const q=new URLSearchParams({device:ME,t:c.token});if(since)q.set('since',since);
+ es=new EventSource(`${c.relay}/events?${q}`);
+ es.addEventListener('presence',e=>setPill(JSON.parse(e.data).devices));
+ es.addEventListener('msg',e=>onMsg(JSON.parse(e.data)));
+ es.onerror=()=>{setPill(null);es.close();es=null;setTimeout(connect,3000)};
+}
+function onMsg(m){
+ if(seen.has(m.mid))return;seen.add(m.mid);since=Math.max(since,m.ts||0);
+ switch(m.type){
+  case 'chat_reply':{clearTimeout(timers.get(m.reqId));timers.delete(m.reqId);typing(false);add({k:'ai',text:m.text||'(no text)'});break}
+  case 'cmd_result':{typing(false);add({k:'sys',text:'🖥 '+m.name+': '+String(m.result||'').slice(0,300)});break}
+  case 'file_saved':{add({k:'sys',text:'✓ '+(m.text||'Saved on laptop')});break}
+  case 'file':{if(m.from!==ME)add({k:'file',dir:'in',id:m.fileId,name:m.name,size:m.size,mime:m.mime,from:m.from});break}
+  case 'notify':{add({k:'notify',title:m.title,body:m.body,app:m.app,from:m.from});
+    if('Notification' in window&&Notification.permission==='granted')new Notification(m.title||'SiriAI',{body:m.body||''});break}
+ }
+ persist();
+}
+async function sendChat(text){
+ text=text.trim();if(!text)return;
+ if(!cfg().relay){$('#setBtn').click();return}
+ add({k:'user',text});input.value='';input.style.height='auto';sendBtn.disabled=true;
+ const reqId=uid();typing(true);
+ timers.set(reqId,setTimeout(()=>{typing(false);add({k:'sys',text:'No reply from '+cfg().laptop+' (timed out). Is the laptop agent running?'})},120000));
+ try{await post('/send',{to:cfg().laptop,type:'chat',reqId,text})}catch(e){typing(false);add({k:'sys',text:'Could not reach relay: '+e.message})}
+}
+async function sendCmd(name,args={}){
+ try{typing(true);await post('/send',{to:cfg().laptop,type:'cmd',reqId:uid(),name,args});setTimeout(()=>typing(false),20000)}catch(e){typing(false);add({k:'sys',text:'Could not reach relay: '+e.message})}
+}
+function upload(file){
+ const c=cfg();if(!c.relay){$('#setBtn').click();return}
+ const it={k:'file',dir:'out',name:file.name||'pasted-image.png',size:file.size,mime:file.type,progress:0,from:ME};
+ const el=add(it);const bar=el.querySelector('.bar i');
+ const x=new XMLHttpRequest();
+ x.open('POST',`${c.relay}/upload?`+new URLSearchParams({name:it.name,mime:file.type||'application/octet-stream',from:ME,to:'*'}));
+ x.setRequestHeader('x-room-token',c.token);x.setRequestHeader('content-type','application/octet-stream');
+ x.upload.onprogress=e=>{if(e.lengthComputable&&bar)bar.style.width=(e.loaded/e.total*100)+'%'};
+ x.onload=()=>{if(x.status===200){if(bar)bar.parentElement.remove();it.progress=undefined;persist()}else{add({k:'sys',text:'Upload failed ('+x.status+'): '+x.responseText.slice(0,100)})}};
+ x.onerror=()=>add({k:'sys',text:'Upload failed (network).'});
+ x.send(file);
+}
+
+/* ---------- UI wiring ---------- */
+$('#form').onsubmit=e=>{e.preventDefault();sendChat(input.value)};
+input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,120)+'px';sendBtn.disabled=!input.value.trim()};
+input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&ME==='browser'){e.preventDefault();sendChat(input.value)}};
+$('#attach').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{[...e.target.files].forEach(upload);e.target.value=''};
+addEventListener('paste',e=>{const fs=[...(e.clipboardData?.files||[])];fs.forEach(upload)});
+let dragN=0;
+addEventListener('dragenter',e=>{e.preventDefault();dragN++;$('#drop').classList.add('show')});
+addEventListener('dragleave',()=>{if(--dragN<=0)$('#drop').classList.remove('show')});
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',e=>{e.preventDefault();dragN=0;$('#drop').classList.remove('show');[...e.dataTransfer.files].forEach(upload)});
+
+[['📸 Screenshot','screenshot'],['🔒 Lock','lock_screen'],['⏯','media_key',{action:'playpause'}],['🔉','media_key',{action:'down',times:3}],['🔊','media_key',{action:'up',times:3}],['🔇','media_key',{action:'mute'}],['⏭','media_key',{action:'next'}],['ℹ️ Status','system_info']]
+ .forEach(([label,name,args])=>{const b=document.createElement('button');b.className='glass';b.textContent=label;b.onclick=()=>sendCmd(name,args||{});$('#chips').appendChild(b)});
+
+const dlg=$('#dlg');
+$('#setBtn').onclick=()=>{const c=cfg();$('#relayIn').value=c.relay;$('#tokenIn').value=c.token;$('#laptopIn').value=c.laptop;dlg.showModal()};
+$('#genBtn').onclick=()=>{const a=new Uint8Array(24);crypto.getRandomValues(a);const t=btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');$('#tokenIn').type='text';$('#tokenIn').value=t;$('#testOut').textContent='New token generated. Copy it into the laptop agent setup and your other devices.'};
+$('#testBtn').onclick=async()=>{const r=$('#relayIn').value.trim().replace(/\/+$/,'');const t=$('#tokenIn').value.trim();$('#testOut').textContent='Testing…';
+ try{const h=await fetch(r+'/health');if(!h.ok)throw new Error('relay not reachable');const w=await fetch(r+'/who',{headers:{'x-room-token':t}});if(w.status===401)throw new Error('relay is reachable but the token was rejected');const j=await w.json();$('#testOut').textContent='Relay OK. Online devices: '+(j.devices.join(', ')||'none yet')}catch(e){$('#testOut').textContent='✗ '+e.message}};
+$('#notifBtn').onclick=async()=>{if(!('Notification' in window)){$('#testOut').textContent='This browser has no web notifications (on iPhone add the page to the Home Screen first).';return}const p=await Notification.requestPermission();$('#testOut').textContent='Alerts: '+p};
+$('#clearBtn').onclick=()=>{items=[];persist();restore();dlg.close()};
+$('#saveBtn').onclick=()=>{st.set('relay',$('#relayIn').value.trim().replace(/\/+$/,''));st.set('token',$('#tokenIn').value.trim());st.set('laptop',$('#laptopIn').value.trim()||'laptop');dlg.close();since=0;connect()};
+
+restore();connect();
+if(!cfg().relay)setTimeout(()=>$('#setBtn').click(),500);
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "relay": "https://your-relay.onrender.com",
+  "token": "a-long-random-secret-at-least-16-chars",
+  "apiKey": "sk-ant-...",
+  "device": "laptop",
+  "model": "claude-sonnet-5-5",
+  "shareDir": "C:\\Users\\YOU\\SiriAI-Share",
+  "allowedDirs": [],
+  "allowShell": false,
+  "ntfyTopic": ""
+}

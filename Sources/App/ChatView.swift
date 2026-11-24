@@ -215,6 +215,9 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var key = Shared.apiKey
     @State private var model = Shared.model
+    @State private var relay = Shared.relay
+    @State private var roomToken = Shared.roomToken
+    @State private var laptop = Shared.laptopName
 
     var body: some View {
         NavigationStack {
@@ -225,6 +228,14 @@ struct SettingsView: View {
                 }
                 Section("Model") {
                     TextField("Model", text: $model)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                }
+                Section("Laptop link") {
+                    TextField("Relay URL (https://...)", text: $relay)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
+                    SecureField("Room token", text: $roomToken)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    TextField("Laptop name", text: $laptop)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
                 }
                 Section("Home screen") {
@@ -241,6 +252,9 @@ struct SettingsView: View {
                 Button("Save") {
                     Shared.apiKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
                     Shared.model = model
+                    Shared.relay = relay.trimmingCharacters(in: .whitespacesAndNewlines)
+                    Shared.roomToken = roomToken.trimmingCharacters(in: .whitespacesAndNewlines)
+                    Shared.laptopName = laptop.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "laptop" : laptop
                     WidgetCenter.shared.reloadAllTimelines()
                     dismiss()
                 }

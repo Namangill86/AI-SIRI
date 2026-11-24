@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: siriai-relay
+    runtime: node
+    plan: free
+    buildCommand: echo ok
+    startCommand: node relay/server.js
+    envVars:
+      - key: ROOM_TOKEN
+        sync: false

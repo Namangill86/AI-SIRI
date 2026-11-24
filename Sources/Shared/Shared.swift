@@ -13,6 +13,19 @@ enum Shared {
         get { defaults.string(forKey: "model") ?? "claude-sonnet-5-5" }
         set { defaults.set(newValue, forKey: "model") }
     }
+    static var relay: String {
+        get { defaults.string(forKey: "relay") ?? "" }
+        set { defaults.set(newValue, forKey: "relay") }
+    }
+    static var roomToken: String {
+        get { defaults.string(forKey: "room_token") ?? "" }
+        set { defaults.set(newValue, forKey: "room_token") }
+    }
+    static var laptopName: String {
+        get { defaults.string(forKey: "laptop_name") ?? "laptop" }
+        set { defaults.set(newValue, forKey: "laptop_name") }
+    }
+    static var deviceName: String { "iphone" }
 }
 
 struct WidgetState: Codable {

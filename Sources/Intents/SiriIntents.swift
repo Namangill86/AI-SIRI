@@ -1,4 +1,5 @@
 import AppIntents
+import UniformTypeIdentifiers
 
 private let voiceSystem = "You are SiriAI answering through Siri. Reply in plain spoken language, under 60 words, no markdown. Use tools when the user asks for an action."
 
@@ -132,6 +133,61 @@ struct OpenChatIntent: AppIntent {
     func perform() async throws -> some IntentResult { .result() }
 }
 
+struct LaunchAppIntent: AppIntent {
+    static var title: LocalizedStringResource = "Open App"
+    static var description = IntentDescription("Open any app by name, e.g. WhatsApp, Maps or Spotify.")
+    static var openAppWhenRun = true
+
+    @Parameter(title: "App name", requestValueDialog: "Which app should I open?")
+    var appName: String
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let r = await Tools.run("open_app", ["name": appName])
+        return .result(dialog: IntentDialog(stringLiteral: r))
+    }
+}
+
+struct RunMyShortcutIntent: AppIntent {
+    static var title: LocalizedStringResource = "Run My Shortcut"
+    static var description = IntentDescription("Run one of your Apple Shortcuts by name.")
+    static var openAppWhenRun = true
+
+    @Parameter(title: "Shortcut name", requestValueDialog: "Which shortcut should I run?")
+    var shortcutName: String
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let r = await Tools.run("run_shortcut", ["name": shortcutName])
+        return .result(dialog: IntentDialog(stringLiteral: r))
+    }
+}
+
+struct AskLaptopIntent: AppIntent {
+    static var title: LocalizedStringResource = "Ask My Laptop"
+    static var description = IntentDescription("Tell the AI on your laptop what to do: open an app, take a screenshot, send a file...")
+
+    @Parameter(title: "Request", requestValueDialog: "What should your laptop do?")
+    var request: String
+
+    func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+        let a = try await Link.ask(request)
+        return .result(value: a, dialog: IntentDialog(stringLiteral: a))
+    }
+}
+
+struct SendToLaptopIntent: AppIntent {
+    static var title: LocalizedStringResource = "Send to Laptop"
+    static var description = IntentDescription("Send a file or photo to your laptop. Add this to the Share Sheet from the Shortcuts app.")
+
+    @Parameter(title: "File")
+    var file: IntentFile
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let mime = file.type?.preferredMIMEType ?? "application/octet-stream"
+        try await Link.sendFile(file.data, name: file.filename, mime: mime)
+        return .result(dialog: "Sent to your laptop.")
+    }
+}
+
 struct SiriAIShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: AskAIIntent(),
@@ -158,8 +214,11 @@ struct SiriAIShortcuts: AppShortcutsProvider {
         AppShortcut(intent: RewriteTextIntent(),
                     phrases: ["Rewrite with \(.applicationName)"],
                     shortTitle: "Rewrite", systemImageName: "pencil")
-        AppShortcut(intent: OpenChatIntent(),
-                    phrases: ["Open \(.applicationName)"],
-                    shortTitle: "Open Chat", systemImageName: "message")
+        AppShortcut(intent: AskLaptopIntent(),
+                    phrases: ["Ask my laptop with \(.applicationName)", "\(.applicationName) laptop"],
+                    shortTitle: "Ask Laptop", systemImageName: "laptopcomputer")
+        AppShortcut(intent: LaunchAppIntent(),
+                    phrases: ["Open an app with \(.applicationName)", "\(.applicationName) open app"],
+                    shortTitle: "Open App", systemImageName: "square.grid.2x2")
     }
 }

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SiriAI">
+<meta name="theme-color" content="#0b0820">
+<title>SiriAI</title>
+<style>
+:root{--glass:rgba(255,255,255,.08);--line:rgba(255,255,255,.15)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:#0b0820;color:#fff;font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+.aurora{position:fixed;inset:0;overflow:hidden;z-index:0}
+.aurora i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:drift 18s ease-in-out infinite alternate}
+.aurora i:nth-child(1){width:46vmax;height:46vmax;background:#4f46e5;left:-10vmax;top:-10vmax}
+.aurora i:nth-child(2){width:40vmax;height:40vmax;background:#a21caf;right:-12vmax;bottom:-8vmax;animation-duration:22s}
+.aurora i:nth-child(3){width:30vmax;height:30vmax;background:#06b6d4;left:30%;top:35%;animation-duration:26s}
+@keyframes drift{to{transform:translate(8vmax,6vmax) scale(1.2)}}
+.app{position:relative;z-index:1;height:100dvh;max-width:820px;margin:0 auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+.icon{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-size:18px;cursor:pointer;transition:transform .2s}
+.icon:active{transform:scale(.9)}
+.icon.rec{background:rgba(239,68,68,.8);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.1)}}
+.orb{position:relative;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from 0deg,#22d3ee,#6366f1,#a855f7,#ec4899,#22d3ee);animation:spin 8s linear infinite}
+.orb::after{content:"";position:absolute;inset:8%;border-radius:50%;background:rgba(15,10,40,.75);backdrop-filter:blur(10px)}
+.orb span{position:relative;z-index:1;line-height:1}
+.orb.sm{width:36px;height:36px;font-size:16px}.orb.big{width:130px;height:130px;font-size:56px}
+.orb.busy{animation:spin 2s linear infinite,beat 1s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beat{50%{scale:1.12}}
+#chat{flex:1;overflow-y:auto;padding:8px 14px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.welcome{margin:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding:10px}
+.welcome h1{margin:0;font-size:32px;letter-spacing:-.5px}
+.welcome p{margin:0;opacity:.6}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:520px}
+.chip{padding:14px;text-align:left;border-radius:16px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font:inherit;font-size:14px;cursor:pointer;animation:rise .6s both;transition:transform .2s}
+.chip:hover{transform:translateY(-2px)}
+.chip:nth-child(2){animation-delay:.08s}.chip:nth-child(3){animation-delay:.16s}.chip:nth-child(4){animation-delay:.24s}
+.msg{max-width:82%;padding:10px 14px;border-radius:20px;white-space:pre-wrap;word-wrap:break-word;animation:pop .4s cubic-bezier(.2,1.2,.4,1) both}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#4f46e5,#9333ea)}
+.msg.ai{align-self:flex-start;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.msg code{background:rgba(255,255,255,.15);padding:1px 5px;border-radius:5px}
+.msg a{color:#93c5fd}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.msg .links a{display:inline-block;padding:7px 14px;border-radius:999px;background:#fff;color:#4338ca;font-weight:600;text-decoration:none;font-size:14px}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.92)}}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}}
+.dots{align-self:flex-start;display:flex;gap:6px;padding:14px;border-radius:18px;background:var(--glass);border:1px solid var(--line)}
+.dots b{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.8;animation:dot 1s infinite}
+.dots b:nth-child(2){animation-delay:.15s}.dots b:nth-child(3){animation-delay:.3s}
+@keyframes dot{50%{transform:scale(.5);opacity:.4}}
+form{display:flex;gap:10px;padding:8px 14px 12px;align-items:flex-end}
+textarea{flex:1;resize:none;max-height:120px;padding:12px 16px;border-radius:24px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font:inherit;outline:none}
+textarea::placeholder{color:rgba(255,255,255,.5)}
+.send{background:linear-gradient(135deg,#4f46e5,#9333ea);border:0;transition:opacity .2s,transform .25s}
+.send:disabled{opacity:.35;transform:scale(.8)}
+dialog{border:1px solid var(--line);border-radius:20px;background:#15103a;color:#fff;padding:20px;width:min(92vw,420px)}
+dialog::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+dialog label{display:block;margin:12px 0 4px;font-size:13px;opacity:.7}
+dialog input{width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font:inherit}
+dialog .row{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+dialog button{padding:9px 18px;border-radius:999px;border:0;font:inherit;font-weight:600;cursor:pointer}
+dialog small{display:block;margin-top:12px;opacity:.55;font-size:12px}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="app">
+  <header>
+    <button class="icon" id="speakBtn" title="Speak replies">🔇</button>
+    <div class="orb sm" id="miniOrb" style="visibility:hidden"><span>✨</span></div>
+    <button class="icon" id="setBtn" title="Settings">⚙️</button>
+  </header>
+  <div id="chat"></div>
+  <form id="form">
+    <button type="button" class="icon" id="micBtn" title="Voice">🎤</button>
+    <textarea id="input" rows="1" placeholder="Ask anything…"></textarea>
+    <button class="icon send" id="sendBtn" disabled>↑</button>
+  </form>
+</div>
+
+<dialog id="dlg">
+  <h3 style="margin:0">Settings</h3>
+  <label>Anthropic API key</label>
+  <input id="keyIn" type="password" placeholder="sk-ant-..." autocomplete="off">
+  <label>Model</label>
+  <input id="modelIn" placeholder="claude-sonnet-5-5">
+  <small>Stored only in this browser. Chats and notes stay on this device. Calls go directly to the Anthropic API.</small>
+  <div class="row">
+    <button id="clearBtn" style="background:#3b2a5a;color:#fff">Clear chat</button>
+    <button id="saveBtn" style="background:#fff;color:#4338ca">Save</button>
+  </div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+const isMobile=/iPhone|iPad|Android/i.test(navigator.userAgent);
+let history=[],busy=false,speak=store.get('speak',false),pendingLinks=[];
+const SYSTEM="You are SiriAI running in a web page on the user's laptop or phone. Be concise and friendly. You can use tools to save/search notes, tell the time, set a reminder that fires while this page stays open, copy text, and prepare buttons that open apps or websites. You cannot read other apps' notifications or control other apps directly; say so if asked.";
+
+const APPS={whatsapp:['whatsapp://','https://web.whatsapp.com'],gmail:['googlegmail://','https://mail.google.com'],youtube:['youtube://','https://www.youtube.com'],
+maps:['maps://','https://maps.google.com'],spotify:['spotify://','https://open.spotify.com'],instagram:['instagram://','https://www.instagram.com'],
+telegram:['tg://','https://web.telegram.org'],twitter:['twitter://','https://x.com'],x:['twitter://','https://x.com'],linkedin:['linkedin://','https://www.linkedin.com'],
+netflix:['nflx://','https://www.netflix.com'],github:['https://github.com','https://github.com'],drive:['googledrive://','https://drive.google.com'],
+calendar:['calshow://','https://calendar.google.com'],zomato:['zomato://','https://www.zomato.com'],swiggy:['swiggy://','https://www.swiggy.com'],
+amazon:['https://www.amazon.in','https://www.amazon.in'],flipkart:['flipkart://','https://www.flipkart.com'],chatgpt:['https://chatgpt.com','https://chatgpt.com'],
+phone:['tel://','tel://'],mail:['mailto:','mailto:']};
+const TOOLS=[
+ {name:'get_time',description:'Current date and time.',input_schema:{type:'object',properties:{}}},
+ {name:'save_note',description:'Save a note.',input_schema:{type:'object',properties:{text:{type:'string'}},required:['text']}},
+ {name:'search_notes',description:'Search saved notes; empty query lists recent.',input_schema:{type:'object',properties:{query:{type:'string'}}}},
+ {name:'set_reminder',description:'Show a reminder notification after N minutes (works while this page is open).',input_schema:{type:'object',properties:{text:{type:'string'},minutes:{type:'number'}},required:['text','minutes']}},
+ {name:'copy_to_clipboard',description:'Copy text to clipboard.',input_schema:{type:'object',properties:{text:{type:'string'}},required:['text']}},
+ {name:'open_app',description:'Prepare a tap-to-open button for an app or website (WhatsApp, YouTube, Maps, Gmail, Spotify...) or a given URL.',input_schema:{type:'object',properties:{name:{type:'string'},url:{type:'string'}},required:['name']}}
+];
+async function runTool(name,inp){
+ try{
+ switch(name){
+  case 'get_time': return new Date().toString();
+  case 'save_note':{const n=store.get('notes',[]);n.unshift({t:inp.text,d:Date.now()});store.set('notes',n);return 'Saved.'}
+  case 'search_notes':{const q=(inp.query||'').toLowerCase();const n=store.get('notes',[]).filter(x=>!q||x.t.toLowerCase().includes(q)).slice(0,10);return n.length?n.map(x=>'- '+x.t).join('\n'):'No notes found.'}
+  case 'set_reminder':{
+   if('Notification' in window&&Notification.permission==='default')await Notification.requestPermission();
+   setTimeout(()=>{if('Notification' in window&&Notification.permission==='granted')new Notification('SiriAI reminder',{body:inp.text});addMsg('ai','⏰ '+inp.text)},Math.max(0.05,inp.minutes)*60000);
+   return 'Reminder set for '+inp.minutes+' min. It only fires while this page stays open.'}
+  case 'copy_to_clipboard':await navigator.clipboard.writeText(inp.text);return 'Copied.';
+  case 'open_app':{
+   let href=inp.url, label=inp.name;
+   if(!href){const k=(inp.name||'').toLowerCase().trim();const hit=APPS[k]||Object.entries(APPS).find(([a])=>k.includes(a))?.[1];
+     href=hit?(isMobile?hit[0]:hit[1]):'https://www.google.com/search?q='+encodeURIComponent(inp.name)}
+   pendingLinks.push({label:'Open '+label,href});return 'A tap-to-open button for '+label+' will be shown.'}
+ }}catch(e){return 'Error: '+e.message}
+ return 'Unknown tool.';
+}
+
+async function converse(){
+ const key=store.get('key','');if(!key)throw new Error('Add your API key first (⚙️ settings).');
+ for(let i=0;i<6;i++){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+   body:JSON.stringify({model:store.get('model','claude-sonnet-5-5'),max_tokens:1024,system:SYSTEM,tools:TOOLS,messages:history})});
+  if(!r.ok)throw new Error('API error '+r.status+': '+(await r.text()).slice(0,200));
+  const j=await r.json();history.push({role:'assistant',content:j.content});
+  const text=j.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+  if(j.stop_reason!=='tool_use')return text;
+  const res=[];for(const b of j.content)if(b.type==='tool_use')res.push({type:'tool_result',tool_use_id:b.id,content:await runTool(b.name,b.input)});
+  history.push({role:'user',content:res});
+ }
+ return 'Done.';
+}
+
+const chat=$('#chat'),input=$('#input'),sendBtn=$('#sendBtn');
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fmt=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+function scroll(){chat.scrollTop=chat.scrollHeight}
+function addMsg(role,text,links=[]){
+ clearWelcome();
+ const d=document.createElement('div');d.className='msg '+role;d.innerHTML=fmt(text);
+ if(links.length){const l=document.createElement('div');l.className='links';links.forEach(x=>{const a=document.createElement('a');a.href=x.href;a.textContent=x.label;a.target='_blank';a.rel='noopener';l.appendChild(a)});d.appendChild(l)}
+ chat.appendChild(d);scroll();return d;
+}
+function showWelcome(){
+ chat.innerHTML=`<div class="welcome"><div class="orb big"><span>✨</span></div><div><h1>How can I help?</h1><p>Works on your laptop and iPhone</p></div>
+ <div class="chips">${['Plan my day','Remind me to drink water in 20 minutes','Give me a fun fact','Open WhatsApp'].map(c=>`<button class="chip" type="button">${c}</button>`).join('')}</div></div>`;
+ chat.querySelectorAll('.chip').forEach(b=>b.onclick=()=>send(b.textContent));
+ $('#miniOrb').style.visibility='hidden';
+}
+function clearWelcome(){const w=chat.querySelector('.welcome');if(w){w.remove();$('#miniOrb').style.visibility='visible'}}
+function setBusy(b){busy=b;sendBtn.disabled=b||!input.value.trim();$('#miniOrb').classList.toggle('busy',b);
+ const ex=$('#typing');if(b&&!ex){const d=document.createElement('div');d.className='dots';d.id='typing';d.innerHTML='<b></b><b></b><b></b>';chat.appendChild(d);scroll()}else if(!b&&ex)ex.remove()}
+async function send(text){
+ text=(text||'').trim();if(!text||busy)return;
+ input.value='';input.style.height='auto';addMsg('user',text);history.push({role:'user',content:text});pendingLinks=[];setBusy(true);
+ try{const reply=await converse();setBusy(false);addMsg('ai',reply||'Done.',pendingLinks);
+  if(speak&&reply)speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
+ }catch(e){history.pop();setBusy(false);addMsg('ai',e.message)}
+}
+$('#form').onsubmit=e=>{e.preventDefault();send(input.value)};
+input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,120)+'px';sendBtn.disabled=busy||!input.value.trim()};
+input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!isMobile){e.preventDefault();send(input.value)}};
+
+const speakBtn=$('#speakBtn');const paintSpeak=()=>speakBtn.textContent=speak?'🔊':'🔇';paintSpeak();
+speakBtn.onclick=()=>{speak=!speak;store.set('speak',speak);paintSpeak();if(!speak)speechSynthesis.cancel()};
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null;
+$('#micBtn').onclick=()=>{
+ if(!SR){addMsg('ai','Voice input is not supported in this browser. Try Chrome or Safari.');return}
+ if(rec){rec.stop();return}
+ rec=new SR();rec.interimResults=true;rec.lang=navigator.language||'en-US';
+ const mic=$('#micBtn');mic.classList.add('rec');mic.textContent='🎙️';
+ rec.onresult=e=>{input.value=[...e.results].map(r=>r[0].transcript).join('');input.oninput()};
+ rec.onend=()=>{mic.classList.remove('rec');mic.textContent='🎤';rec=null;if(input.value.trim())send(input.value)};
+ rec.onerror=()=>{};rec.start();
+};
+
+const dlg=$('#dlg');
+$('#setBtn').onclick=()=>{$('#keyIn').value=store.get('key','');$('#modelIn').value=store.get('model','claude-sonnet-5-5');dlg.showModal()};
+$('#saveBtn').onclick=()=>{store.set('key',$('#keyIn').value.trim());store.set('model',$('#modelIn').value.trim()||'claude-sonnet-5-5');dlg.close()};
+$('#clearBtn').onclick=()=>{history=[];showWelcome();dlg.close()};
+
+showWelcome();
+if(!store.get('key',''))setTimeout(()=>$('#setBtn').click(),600);
+</script>
+</body>
+</html>

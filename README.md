@@ -24,3 +24,18 @@ SwiftUI iPhone app (iOS 17+) with an AI assistant (Claude API).
 - The widget shares the API key with the app through the App Group. If your signer cannot grant App Groups,
   Siri/Shortcuts still work in the app, but the widget will say the key is missing.
 - First run: gear icon -> paste Anthropic API key.
+
+## Laptop + iPhone (web version)
+`docs/index.html` is a standalone web app with the same look. Open it on a laptop, or on an iPhone in Safari
+(Share -> Add to Home Screen). Host it free with GitHub Pages: repo Settings -> Pages -> Deploy from branch ->
+`main` / `/docs` (private repos need a paid plan for Pages; make the repo public, no secrets are stored in it).
+Paste your API key in its settings. Chats and notes stay in each device's browser.
+
+## Limits (Apple rules)
+- iOS does not let any app read other apps' notifications or drive other apps. SiriAI can open apps, run your
+  Apple Shortcuts, and schedule its own notifications. For hands-free notification reading use iOS's built-in
+  Settings -> Notifications -> Announce Notifications.
+
+## Laptop <-> iPhone link (new)
+See `LINK-SETUP.md`: relay (`relay/server.js`), laptop agent (`agent/agent.js`), hub page (`docs/hub.html`),
+and native intents "Ask My Laptop" / "Send to Laptop". Tested end-to-end with `npm test`.

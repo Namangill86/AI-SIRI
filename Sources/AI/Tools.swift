@@ -1,6 +1,7 @@
 import Foundation
 import EventKit
 import UIKit
+import UserNotifications
 
 /// Device actions the AI can call (same kind of things people ask Siri to do).
 enum Tools {
@@ -19,7 +20,16 @@ enum Tools {
         tool("search_notes", "Search saved notes (empty query lists recent).",
              ["query": str("Search text")], required: []),
         tool("get_device_status", "Get battery level and current date/time.", [:], required: []),
-        tool("copy_to_clipboard", "Copy text to the clipboard.", ["text": str("Text")], required: ["text"])
+        tool("copy_to_clipboard", "Copy text to the clipboard.", ["text": str("Text")], required: ["text"]),
+        tool("open_app", "Open another app on the iPhone by name (WhatsApp, Maps, Spotify, Instagram, Swiggy, GPay, Settings...) or by URL scheme.",
+             ["name": str("App name"), "url": str("Optional URL or URL scheme, e.g. whatsapp://send?text=hi")], required: ["name"]),
+        tool("run_shortcut", "Run one of the user's Apple Shortcuts by name. This is how to control other apps' actions.",
+             ["name": str("Exact shortcut name"), "input": str("Optional text input")], required: ["name"]),
+        tool("ask_laptop", "Send a request to the AI agent on the user's laptop (open laptop apps, take a screenshot, send/receive files, control media) and return its answer.",
+             ["text": str("What to ask the laptop to do")], required: ["text"]),
+        tool("schedule_notification", "Schedule a local notification from SiriAI at a future time.",
+             ["title": str("Title"), "body": str("Body"), "when_iso": str("Local ISO 8601 date-time")],
+             required: ["title", "when_iso"])
     ]
 
     private static func str(_ d: String) -> [String: Any] { ["type": "string", "description": d] }
@@ -91,6 +101,35 @@ enum Tools {
                 let t = input["text"] as? String ?? ""
                 await MainActor.run { UIPasteboard.general.string = t }
                 return "Copied."
+            case "open_app":
+                let name = input["name"] as? String ?? ""
+                guard let url = AppLinks.url(for: name, raw: input["url"] as? String) else {
+                    return "No link known for \"\(name)\". Try run_shortcut or pass a URL scheme."
+                }
+                return await open(url)
+            case "run_shortcut":
+                var c = URLComponents(string: "shortcuts://run-shortcut")!
+                c.queryItems = [URLQueryItem(name: "name", value: input["name"] as? String ?? "")]
+                if let t = input["input"] as? String, !t.isEmpty {
+                    c.queryItems?.append(URLQueryItem(name: "input", value: "text"))
+                    c.queryItems?.append(URLQueryItem(name: "text", value: t))
+                }
+                guard let url = c.url else { return "Bad shortcut name." }
+                return await open(url)
+            case "ask_laptop":
+                return try await Link.ask(input["text"] as? String ?? "")
+            case "schedule_notification":
+                let center = UNUserNotificationCenter.current()
+                guard try await center.requestAuthorization(options: [.alert, .sound]) else { return "Notification permission denied." }
+                guard let date = parseDate(input["when_iso"] as? String), date > Date() else { return "Invalid or past time." }
+                let c = UNMutableNotificationContent()
+                c.title = input["title"] as? String ?? "SiriAI"
+                c.body = input["body"] as? String ?? ""
+                c.sound = .default
+                let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+                let trig = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+                try await center.add(UNNotificationRequest(identifier: UUID().uuidString, content: c, trigger: trig))
+                return "Notification scheduled."
             default:
                 return "Unknown tool."
             }

@@ -15,7 +15,7 @@ final class AIAssistant: @unchecked Sendable {
     static let shared = AIAssistant()
     var model: String { Shared.model }
 
-    private let defaultSystem = "You are SiriAI, a helpful assistant on the user's iPhone. You can use tools to create reminders and calendar events, save and search notes, read device status and copy text. Use tools when the user asks for those actions. Be concise."
+    private let defaultSystem = "You are SiriAI, a helpful assistant on the user's iPhone. You can use tools to create reminders and calendar events, save and search notes, read device status, copy text, open other apps (open_app), run the user's Apple Shortcuts (run_shortcut) and schedule notifications. For anything on the user's laptop (its apps, files, screenshots, sending files) use ask_laptop. You cannot read notifications from other iPhone apps; say so if asked. Use tools when the user asks for those actions. Be concise."
 
     /// One-shot question (used by Siri / Shortcuts).
     func ask(_ prompt: String, system: String? = nil, tools: Bool = true) async throws -> String {
