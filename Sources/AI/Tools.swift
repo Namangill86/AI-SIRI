@@ -117,7 +117,7 @@ enum Tools {
                 guard let url = c.url else { return "Bad shortcut name." }
                 return await open(url)
             case "ask_laptop":
-                return try await Link.ask(input["text"] as? String ?? "")
+                return try await RelayLink.ask(input["text"] as? String ?? "")
             case "schedule_notification":
                 let center = UNUserNotificationCenter.current()
                 guard try await center.requestAuthorization(options: [.alert, .sound]) else { return "Notification permission denied." }

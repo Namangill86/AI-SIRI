@@ -15,7 +15,7 @@ enum LinkError: LocalizedError {
 }
 
 /// Talks to your own relay so Siri / Shortcuts / the app can reach the laptop agent.
-enum Link {
+enum RelayLink {
     static func request(_ path: String, query: [String: String] = [:], json: [String: Any]? = nil,
                         raw: Data? = nil, timeout: TimeInterval = 100) async throws -> Data {
         let base = Shared.relay.trimmingCharacters(in: CharacterSet(charactersIn: "/ "))
