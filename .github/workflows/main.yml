@@ -1,0 +1,26 @@
+name: Build IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen ldid
+      - run: xcodegen generate
+      - name: Build unsigned
+        run: |
+          xcodebuild -project SiriAI.xcodeproj -scheme SiriAI -configuration Release \
+            -sdk iphoneos -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/SiriAI.app Payload/
+          ldid -SSources/SiriAI.entitlements Payload/SiriAI.app/SiriAI
+          ldid -SSources/SiriAIWidget.entitlements Payload/SiriAI.app/PlugIns/SiriAIWidget.appex/SiriAIWidget
+          zip -r SiriAI.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SiriAI-ipa
+          path: SiriAI.ipa
